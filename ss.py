@@ -21,16 +21,12 @@ H = 1.5
 alpha = 0.05
 beta = 0.05
 
-# conduct pilot study to estimate mean and standard deviation
-# initial estimate of std dev
-_, s = pilot_study()
-
-print("pilot study std dev:", s)
-
-# h1: mean <= u1
-# h2: mean >= u2
+# Hypothesis 1: mean <= u1
+# Hypothesis 2: mean >= u2
 # s: estimate of stddev
-def test_normal(u1, u2, s, alpha, beta):
+# alpha: chance of rejecting H1 when H1 is correct
+# beta: chance of rejecting H2 when H2 is correct
+def ss_normal(u1, u2, s, alpha, beta):
     # assert(u1 < u2)
     b = (u1+u2) / 2.0 # slope
     A = math.log((1.0-alpha)/beta)
@@ -42,7 +38,7 @@ def test_normal(u1, u2, s, alpha, beta):
     accept_h1 = lambda y,n: y < b * n + h1
     accept_h2 = lambda y,n: y > b * n + h2
 
-    conclusion = "uncertain"
+    conclusion = 0 # uncertain
 
     samples = []
     while True:
@@ -50,10 +46,10 @@ def test_normal(u1, u2, s, alpha, beta):
         y = sum(samples)
 
         if accept_h1(y, len(samples)):
-            conclusion = "mean < u1"
+            conclusion = -1 # mean < u1
             break
         if accept_h2(y, len(samples)):
-            conclusion = "mean > u2"
+            conclusion = 1 # mean > u2
             break
 
     plotSamples = np.cumsum(samples)
@@ -67,5 +63,26 @@ def test_normal(u1, u2, s, alpha, beta):
 
     return conclusion, len(samples)
 
-result = test_normal(1.47, 1.49, s, alpha, beta)
-print(result)
+
+while True:
+    # conduct pilot study to estimate mean and standard deviation
+    # initial estimate of std dev
+    u, s = pilot_study()
+
+    print("pilot study std dev:", s)
+
+    # binary search from u-6s to u+6s?
+    h1 = (u-6.0*s) + (u  +6.0*s) / 3
+    h2 = 2.0 * h1
+
+    ## conduct search with sequential sampling to determine window of true results
+
+
+    
+
+    result = test_normal(1.47, 1.49, s, alpha, beta)
+    print(result)
+
+    ## conduct final study to measure results
+
+    ## if not within sequential sampling window, start over
